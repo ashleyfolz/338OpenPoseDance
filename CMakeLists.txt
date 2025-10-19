@@ -1,4 +1,6 @@
 ### VERSION INFO
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_policy(SET CMP0048 NEW)
 set(OpenPose_VERSION_MAJOR 1)
 set(OpenPose_VERSION_MINOR 7)
 set(OpenPose_VERSION_PATCH 0)
@@ -14,26 +16,8 @@ set(CMAKE_MACOSX_RPATH 1)
 # https://cmake.org/cmake/help/v3.10/module/FindCUDA.html
 # https://cmake.org/cmake/help/v3.10/command/project.html
 # https://devblogs.nvidia.com/building-cuda-applications-cmake/
-if (${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-  cmake_policy(SET CMP0048 NEW)
-  project(OpenPose VERSION ${OpenPose_VERSION})
-  # # Not tested
-  # cmake_policy(SET CMP0048 NEW)
-  # set(CUDACXX /usr/local/cuda/bin/nvcc)
-  # project(OpenPose VERSION ${OpenPose_VERSION} LANGUAGES CXX CUDA)
-  # set(AUTO_FOUND_CUDA TRUE)
-  # # else
-  # set(AUTO_FOUND_CUDA FALSE)
-# Ubuntu 16 default
-elseif (${CMAKE_VERSION} VERSION_GREATER 3.0.0)
-  cmake_policy(SET CMP0048 NEW)
-  project(OpenPose VERSION ${OpenPose_VERSION})
-else (${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-  project(OpenPose)
-endif (${CMAKE_VERSION} VERSION_GREATER 3.9.0)
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR) # required by cmake eigen finder to find locally installed versions (e.g., CUDA 9.2 support was added in eigen 3.3.5)
-# cmake_minimum_required(VERSION 2.8.7 FATAL_ERROR) # min. cmake version recommended by Caffe
-
+# min. cmake version recommended by Caffe
+project(OpenPose VERSION ${OpenPose_VERSION})
 
 ### Extra functionality
 include(cmake/Utils.cmake)
@@ -787,15 +771,29 @@ if (UNIX OR APPLE)
           -DMKLDNN_INSTALL_DIR:PATH=<INSTALL_DIR>
           -DUSE_MKL2017_AS_DEFAULT_ENGINE=${CAFFE_CPU_ONLY}
           -DUSE_CUDNN=${USE_CUDNN}
-          -DCUDA_ARCH_NAME=${CUDA_ARCH}
+          -DCUDA_ARCH_NAME=${CUDA_ARCH} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           -DCUDA_ARCH_BIN=${CUDA_ARCH_BIN}
           -DCUDA_ARCH_PTX=${CUDA_ARCH_PTX}
           -DCPU_ONLY=${CAFFE_CPU_ONLY}
           -DCMAKE_BUILD_TYPE=Release
+	-DCMAKE_CXX_STANDARD=14
+	-DCMAKE_CXX_STANDARD_REQUIRED=ON
+	-DCMAKE_CXX_EXTENSIONS=OFF
+
           -DBUILD_docs=OFF
           -DBUILD_python=OFF
           -DBUILD_python_layer=OFF
-          -DUSE_LEVELDB=OFF
+          -DUSE_LEVELDB=OFF 
+	  -DCMAKE_POLICY_DEFAULT_CMP0167=NEW
+	  -DBoost_DIR=/opt/homebrew/Cellar/boost/1.89.0/lib/cmake/Boost-1.89.0
+	  -DBoost_COMPONENTS=filesystem;thread;regex;system
+	  -DBoost_USE_STATIC_LIBS=OFF
+   	 -DBoost_USE_MULTITHREADED=ON
+   	  -DBoost_USE_STATIC_RUNTIME=OFF
+	  -DBLAS=Open
+ 	 -DOpenBLAS_INCLUDE_DIR=/opt/homebrew/opt/openblas/include
+ 	 -DOpenBLAS_LIB=/opt/homebrew/opt/openblas/lib/libopenblas.dylib	
+	  -DCMAKE_PREFIX_PATH=/opt/homebrew
           -DUSE_LMDB=OFF
           -DUSE_OPENCV=OFF)
           # -DOpenCV_DIR=${OpenCV_DIR})
@@ -811,9 +809,26 @@ if (UNIX OR APPLE)
           -DCUDA_ARCH_PTX=${CUDA_ARCH_PTX}
           -DCPU_ONLY=${CAFFE_CPU_ONLY}
           -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_docs=OFF
+	 -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+         -DCMAKE_CXX_STANDARD=14
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON
+        -DCMAKE_CXX_EXTENSIONS=OFF
+	  -DBUILD_docs=OFF
           -DBUILD_python=OFF
-          -DBUILD_python_layer=OFF
+            # force FindBoost path
+           -DCMAKE_POLICY_DEFAULT_CMP0167=NEW
+          -DBoost_DIR=/opt/homebrew/Cellar/boost/1.89.0/lib/cmake/Boost-1.89.0
+
+          -DBoost_COMPONENTS=filesystem;thread;regex;system
+          -DBoost_USE_STATIC_LIBS=OFF
+         -DBoost_USE_MULTITHREADED=ON
+          -DBoost_USE_STATIC_RUNTIME=OFF
+            # adjust if brew --prefix boost differs
+          -DCMAKE_PREFIX_PATH=/opt/homebrew    # let CMake see Homebrew prefixes	
+           -DBLAS=Open
+         -DOpenBLAS_INCLUDE_DIR=/opt/homebrew/opt/openblas/include
+         -DOpenBLAS_LIB=/opt/homebrew/opt/openblas/lib/libopenblas.dylib
+	  -DBUILD_python_layer=OFF
           -DUSE_LEVELDB=OFF
           -DUSE_LMDB=OFF
           -DUSE_OPENCV=OFF)
@@ -847,7 +862,9 @@ include_directories(
   ${Protobuf_INCLUDE_DIRS}
   ${GFLAGS_INCLUDE_DIR}
   ${GLOG_INCLUDE_DIR}
-  ${OpenCV_INCLUDE_DIRS})
+  ${OpenCV_INCLUDE_DIRS}
+  ${Caffe_INCLUDE_DIRS}
+  /opt/homebrew/include)
 
 if (USE_ASIO)
   include_directories(${CMAKE_SOURCE_DIR}/3rdparty/asio/include/)
