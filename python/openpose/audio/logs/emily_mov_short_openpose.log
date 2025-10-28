@@ -1,0 +1,14 @@
+Starting OpenPose demo...
+Configuring OpenPose...
+Starting thread(s)...
+OpenCV: Couldn't read video stream from file "examples/media/emily_mov_short.mov"
+
+Error:
+VideoCapture (IP camera/video) could not be opened for path: 'examples/media/emily_mov_short.mov'. If it is a video path, is the path correct?
+
+Coming from:
+- /Users/ashleyfolz/openpose/src/openpose/producer/videoCaptureReader.cpp:VideoCaptureReader():54
+- /Users/ashleyfolz/openpose/src/openpose/producer/videoCaptureReader.cpp:VideoCaptureReader():58
+- /Users/ashleyfolz/openpose/src/openpose/producer/producer.cpp:createProducer():475
+- /Users/ashleyfolz/openpose/include/openpose/wrapper/wrapperAuxiliary.hpp:configureThreadManager():1221
+- /Users/ashleyfolz/openpose/include/openpose/wrapper/wrapper.hpp:exec():424
